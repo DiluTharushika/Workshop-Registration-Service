@@ -11,15 +11,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.send('Workshop Registration API is running...');
-});
+app.get('/', (req, res) => res.send('Workshop Registration API is running...'));
 
-// Routes will be added here in later parts
- app.use('/api/auth', require('./routes/authRoutes'));
- app.use('/api/users', require('./routes/userRoutes'));
- app.use('/api/workshops', require('./routes/workshopRoutes'));
- app.use('/api/registrations', require('./routes/registrationRoutes'));
+app.use('/api/auth',          require('./routes/authRoutes'));
+app.use('/api/users',         require('./routes/userRoutes'));
+app.use('/api/workshops',     require('./routes/workshopRoutes'));
+app.use('/api/registrations', require('./routes/registrationRoutes'));
+app.use('/api/audit',         require('./routes/auditRoutes'));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

@@ -5,16 +5,22 @@ const {
   getWorkshops,
   getWorkshopById,
   updateWorkshop,
+  joinWaitlist,
+  leaveWaitlist,
 } = require('../controllers/workshopController');
 const { protect } = require('../middleware/authMiddleware');
 const authorize = require('../middleware/roleMiddleware');
 
-// Admin + Manager + Staff can view
-router.get('/', protect, authorize('admin', 'manager', 'staff'), getWorkshops);
+// View
+router.get('/',    protect, authorize('admin', 'manager', 'staff'), getWorkshops);
 router.get('/:id', protect, authorize('admin', 'manager', 'staff'), getWorkshopById);
 
-// Admin + Manager can create/edit
-router.post('/', protect, authorize('admin', 'manager'), createWorkshop);
-router.put('/:id', protect, authorize('admin', 'manager'), updateWorkshop);
+// Create / Edit — Admin + Manager
+router.post('/',    protect, authorize('admin', 'manager'), createWorkshop);
+router.put('/:id',  protect, authorize('admin', 'manager'), updateWorkshop);
+
+// Waitlist — Manager + Staff
+router.post(  '/:id/waitlist',         protect, authorize('admin', 'manager', 'staff'), joinWaitlist);
+router.delete('/:id/waitlist/:entryId',protect, authorize('admin', 'manager', 'staff'), leaveWaitlist);
 
 module.exports = router;

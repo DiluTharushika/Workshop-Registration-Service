@@ -1,5 +1,12 @@
 const mongoose = require('mongoose');
 
+const waitlistEntrySchema = new mongoose.Schema({
+  attendeeName:  { type: String, required: true },
+  attendeeEmail: { type: String, required: true, lowercase: true },
+  addedBy:       { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  addedAt:       { type: Date, default: Date.now },
+});
+
 const workshopSchema = new mongoose.Schema(
   {
     code: {
@@ -40,6 +47,11 @@ const workshopSchema = new mongoose.Schema(
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
+    },
+    // ── Waitlist ──────────────────────────────────────────────
+    waitlist: {
+      type: [waitlistEntrySchema],
+      default: [],
     },
   },
   { timestamps: true }
