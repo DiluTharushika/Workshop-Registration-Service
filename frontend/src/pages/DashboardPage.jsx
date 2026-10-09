@@ -55,17 +55,12 @@ const DashboardPage = () => {
   };
 
   const handleFormSubmit = async (formData) => {
-    const payload = {
-      ...formData,
-      capacity: Number(formData.capacity),
-    };
-
+    const payload = { ...formData, capacity: Number(formData.capacity) };
     if (editingWorkshop) {
       await api.put(`/workshops/${editingWorkshop._id}`, payload);
     } else {
       await api.post('/workshops', payload);
     }
-
     setShowForm(false);
     setEditingWorkshop(null);
     fetchWorkshops();
@@ -75,66 +70,126 @@ const DashboardPage = () => {
     navigate(`/registrations?workshopId=${workshop._id}`);
   };
 
+  // Stats
+  const totalWorkshops = workshops.length;
+  const activeWorkshops = workshops.filter(w => w.status === 'active').length;
+  const totalSeats = workshops.reduce((a, w) => a + (w.capacity || 0), 0);
+  const bookedSeats = workshops.reduce((a, w) => a + (w.bookedSeats || 0), 0);
+
   return (
-    <div>
+    <div className="page-container">
       <Navbar />
-      <div style={{ padding: '24px' }}>
-        <h2>Workshop Catalogue</h2>
+
+      <div className="page-content">
+        {/* Page header */}
+        <div style={styles.pageHeader}>
+          <div>
+            <h2 style={{ marginBottom: 4 }}>Workshop Catalogue</h2>
+            <p style={styles.pageDesc}>Manage and track all workshops in one place</p>
+          </div>
+          {user.role === 'manager' && (
+            <button
+              onClick={showForm ? () => setShowForm(false) : handleAddClick}
+              className="btn btn-success"
+            >
+              {showForm ? '✕ Close Form' : '+ Add Workshop'}
+            </button>
+          )}
+        </div>
+
+        {/* Stats row */}
+        <div style={styles.statsRow}>
+          {[
+            { label: 'Total Workshops', value: totalWorkshops, icon: '🎓', color: '#6366f1' },
+            { label: 'Active',          value: activeWorkshops, icon: '✅', color: '#10b981' },
+            { label: 'Total Capacity',  value: totalSeats,      icon: '🪑', color: '#06b6d4' },
+            { label: 'Seats Booked',   value: bookedSeats,     icon: '👥', color: '#f59e0b' },
+          ].map((stat) => (
+            <div key={stat.label} style={{ ...styles.statCard, borderTopColor: stat.color }}>
+              <div style={{ ...styles.statIcon, background: `${stat.color}22`, color: stat.color }}>
+                {stat.icon}
+              </div>
+              <div>
+                <div style={{ ...styles.statValue, color: stat.color }}>{stat.value}</div>
+                <div style={styles.statLabel}>{stat.label}</div>
+              </div>
+            </div>
+          ))}
+        </div>
 
         {/* Filters */}
-        <form onSubmit={handleFilterSubmit} style={styles.filterBar}>
-          <select
-            value={filters.status}
-            onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-            style={styles.input}
-          >
-            <option value="">All Status</option>
-            <option value="active">Active</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="completed">Completed</option>
-          </select>
+        <div style={styles.filterCard}>
+          <p style={styles.filterTitle}>🔍 Filter Workshops</p>
+          <form onSubmit={handleFilterSubmit} style={styles.filterForm}>
+            <div style={styles.filterField}>
+              <label className="form-label">Status</label>
+              <select
+                value={filters.status}
+                onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                className="select-field"
+              >
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
 
-          <input
-            type="date"
-            value={filters.fromDate}
-            onChange={(e) => setFilters({ ...filters, fromDate: e.target.value })}
-            style={styles.input}
-          />
-          <input
-            type="date"
-            value={filters.toDate}
-            onChange={(e) => setFilters({ ...filters, toDate: e.target.value })}
-            style={styles.input}
-          />
+            <div style={styles.filterField}>
+              <label className="form-label">From Date</label>
+              <input
+                type="date"
+                value={filters.fromDate}
+                onChange={(e) => setFilters({ ...filters, fromDate: e.target.value })}
+                className="input-field"
+              />
+            </div>
 
-          <label style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <input
-              type="checkbox"
-              checked={filters.availableOnly}
-              onChange={(e) => setFilters({ ...filters, availableOnly: e.target.checked })}
-            />
-            Seats available only
-          </label>
+            <div style={styles.filterField}>
+              <label className="form-label">To Date</label>
+              <input
+                type="date"
+                value={filters.toDate}
+                onChange={(e) => setFilters({ ...filters, toDate: e.target.value })}
+                className="input-field"
+              />
+            </div>
 
-          <button type="submit" style={styles.filterBtn}>Apply Filters</button>
-        </form>
+            <div style={styles.filterField}>
+              <label className="form-label">&nbsp;</label>
+              <label className="checkbox-label" style={{ paddingTop: '6px' }}>
+                <input
+                  type="checkbox"
+                  checked={filters.availableOnly}
+                  onChange={(e) => setFilters({ ...filters, availableOnly: e.target.checked })}
+                />
+                Seats available only
+              </label>
+            </div>
 
-        {user.role === 'manager' && (
-          <button onClick={handleAddClick} style={styles.addBtn}>
-            + Add Workshop
-          </button>
-        )}
+            <div style={styles.filterField}>
+              <label className="form-label">&nbsp;</label>
+              <button type="submit" className="btn btn-primary" style={{ height: '38px' }}>
+                Apply Filters
+              </button>
+            </div>
+          </form>
+        </div>
 
+        {/* Workshop form */}
         {showForm && (
-          <WorkshopForm
-            initialData={editingWorkshop}
-            onSubmit={handleFormSubmit}
-            onCancel={() => setShowForm(false)}
-          />
+          <div className="animate-in">
+            <WorkshopForm
+              initialData={editingWorkshop}
+              onSubmit={handleFormSubmit}
+              onCancel={() => setShowForm(false)}
+            />
+          </div>
         )}
 
+        {/* Table */}
         {loading ? (
-          <p>Loading...</p>
+          <div className="loading-pulse">Loading workshops…</div>
         ) : (
           <WorkshopTable
             workshops={workshops}
@@ -148,30 +203,88 @@ const DashboardPage = () => {
 };
 
 const styles = {
-  filterBar: {
+  pageHeader: {
     display: 'flex',
-    gap: '10px',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: '12px',
+    marginBottom: '24px',
+  },
+  pageDesc: {
+    fontSize: '13.5px',
+    color: '#64748b',
+  },
+  statsRow: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+    gap: '14px',
+    marginBottom: '22px',
+  },
+  statCard: {
+    display: 'flex',
     alignItems: 'center',
-    marginBottom: '16px',
+    gap: '14px',
+    padding: '18px 20px',
+    background: 'rgba(255,255,255,0.05)',
+    backdropFilter: 'blur(12px)',
+    WebkitBackdropFilter: 'blur(12px)',
+    border: '1px solid rgba(255,255,255,0.08)',
+    borderTop: '3px solid',
+    borderRadius: '12px',
+    boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+  },
+  statIcon: {
+    width: '42px',
+    height: '42px',
+    borderRadius: '10px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '1.3rem',
+    flexShrink: 0,
+  },
+  statValue: {
+    fontSize: '1.6rem',
+    fontWeight: 800,
+    lineHeight: 1,
+    marginBottom: '3px',
+  },
+  statLabel: {
+    fontSize: '11.5px',
+    color: '#64748b',
+    fontWeight: 600,
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+  },
+  filterCard: {
+    background: 'rgba(255,255,255,0.04)',
+    backdropFilter: 'blur(12px)',
+    WebkitBackdropFilter: 'blur(12px)',
+    border: '1px solid rgba(255,255,255,0.07)',
+    borderRadius: '14px',
+    padding: '18px 22px',
+    marginBottom: '20px',
+  },
+  filterTitle: {
+    fontSize: '13px',
+    fontWeight: 700,
+    color: '#94a3b8',
+    marginBottom: '14px',
+    letterSpacing: '0.02em',
+  },
+  filterForm: {
+    display: 'flex',
+    gap: '14px',
+    alignItems: 'flex-end',
     flexWrap: 'wrap',
   },
-  input: { padding: '6px', borderRadius: '4px', border: '1px solid #ccc' },
-  filterBtn: {
-    padding: '6px 14px',
-    background: '#4b5563',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-  },
-  addBtn: {
-    padding: '8px 16px',
-    background: '#16a34a',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    marginBottom: '10px',
+  filterField: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '5px',
+    minWidth: '160px',
+    flex: '1 1 160px',
   },
 };
 

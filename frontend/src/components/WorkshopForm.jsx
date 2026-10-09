@@ -12,6 +12,7 @@ const emptyForm = {
 const WorkshopForm = ({ initialData, onSubmit, onCancel }) => {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (initialData) {
@@ -38,120 +39,137 @@ const WorkshopForm = ({ initialData, onSubmit, onCancel }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
     try {
       await onSubmit(form);
     } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong');
+      setError(err.response?.data?.message || 'Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
+  const fields = [
+    { name: 'code',       label: 'Workshop Code',  placeholder: 'e.g. WS-005', type: 'text',          disabled: !!initialData },
+    { name: 'title',      label: 'Title',           placeholder: 'Workshop title',  type: 'text' },
+    { name: 'instructor', label: 'Instructor',      placeholder: 'Instructor name', type: 'text' },
+    { name: 'dateTime',   label: 'Date & Time',     placeholder: '',               type: 'datetime-local' },
+    { name: 'capacity',   label: 'Capacity',        placeholder: 'Max attendees',  type: 'number', min: 1 },
+  ];
+
   return (
-    <form onSubmit={handleSubmit} style={styles.form}>
-      <h3>{initialData ? 'Edit Workshop' : 'Add Workshop'}</h3>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-
-      <input
-        name="code"
-        placeholder="Workshop Code (e.g. WS-005)"
-        value={form.code}
-        onChange={handleChange}
-        disabled={!!initialData}
-        required
-        style={styles.input}
-      />
-      <input
-        name="title"
-        placeholder="Title"
-        value={form.title}
-        onChange={handleChange}
-        required
-        style={styles.input}
-      />
-      <input
-        name="instructor"
-        placeholder="Instructor"
-        value={form.instructor}
-        onChange={handleChange}
-        required
-        style={styles.input}
-      />
-      <input
-        type="datetime-local"
-        name="dateTime"
-        value={form.dateTime}
-        onChange={handleChange}
-        required
-        style={styles.input}
-      />
-      <input
-        type="number"
-        name="capacity"
-        placeholder="Capacity"
-        value={form.capacity}
-        onChange={handleChange}
-        min="1"
-        required
-        style={styles.input}
-      />
-      <textarea
-        name="description"
-        placeholder="Description (optional)"
-        value={form.description}
-        onChange={handleChange}
-        style={styles.input}
-      />
-
-      {initialData && (
-        <select name="status" value={form.status} onChange={handleChange} style={styles.input}>
-          <option value="active">Active</option>
-          <option value="cancelled">Cancelled</option>
-          <option value="completed">Completed</option>
-        </select>
-      )}
-
-      <div style={{ display: 'flex', gap: '10px' }}>
-        <button type="submit" style={styles.submitBtn}>
-          {initialData ? 'Update' : 'Create'}
-        </button>
-        <button type="button" onClick={onCancel} style={styles.cancelBtn}>
-          Cancel
-        </button>
+    <div style={styles.wrapper}>
+      <div style={styles.header}>
+        <h3 style={styles.heading}>
+          {initialData ? '✏️ Edit Workshop' : '➕ Add New Workshop'}
+        </h3>
+        <p style={styles.subheading}>
+          {initialData
+            ? 'Update the workshop details below'
+            : 'Fill in the details to create a new workshop'}
+        </p>
       </div>
-    </form>
+
+      <form onSubmit={handleSubmit}>
+        {error && (
+          <div className="alert alert-error" style={{ marginBottom: '16px' }}>
+            ⚠ {error}
+          </div>
+        )}
+
+        <div style={styles.grid}>
+          {fields.map((f) => (
+            <div className="form-group" key={f.name}>
+              <label className="form-label">{f.label}</label>
+              <input
+                name={f.name}
+                type={f.type}
+                placeholder={f.placeholder}
+                value={form[f.name]}
+                onChange={handleChange}
+                disabled={f.disabled}
+                required={f.name !== 'description'}
+                min={f.min}
+                className="input-field"
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Description — full width */}
+        <div className="form-group" style={{ marginTop: '14px' }}>
+          <label className="form-label">Description (optional)</label>
+          <textarea
+            name="description"
+            placeholder="Brief description of what attendees will learn…"
+            value={form.description}
+            onChange={handleChange}
+            className="textarea-field"
+          />
+        </div>
+
+        {/* Status (edit mode only) */}
+        {initialData && (
+          <div className="form-group" style={{ marginTop: '14px', maxWidth: '200px' }}>
+            <label className="form-label">Status</label>
+            <select name="status" value={form.status} onChange={handleChange} className="select-field">
+              <option value="active">Active</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+        )}
+
+        <div style={styles.actions}>
+          <button type="submit" className="btn btn-primary" disabled={loading}>
+            {loading
+              ? (initialData ? 'Updating…' : 'Creating…')
+              : (initialData ? '✓ Update Workshop' : '✓ Create Workshop')}
+          </button>
+          <button type="button" onClick={onCancel} className="btn btn-ghost">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
   );
 };
 
 const styles = {
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '10px',
-    background: '#f9fafb',
-    padding: '20px',
-    borderRadius: '8px',
+  wrapper: {
+    background: 'rgba(15, 12, 41, 0.72)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
+    border: '1px solid rgba(99, 102, 241, 0.2)',
+    borderRadius: '16px',
+    padding: '24px 28px',
+    marginBottom: '24px',
+    boxShadow: '0 12px 40px rgba(0,0,0,0.4)',
+  },
+  header: {
     marginBottom: '20px',
-    maxWidth: '400px',
   },
-  input: {
-    padding: '8px',
-    borderRadius: '4px',
-    border: '1px solid #ccc',
+  heading: {
+    fontSize: '16px',
+    fontWeight: 700,
+    color: '#f1f5f9',
+    marginBottom: '4px',
   },
-  submitBtn: {
-    padding: '8px 16px',
-    background: '#2563eb',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
+  subheading: {
+    fontSize: '13px',
+    color: '#64748b',
   },
-  cancelBtn: {
-    padding: '8px 16px',
-    background: '#9ca3af',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
+  grid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+    gap: '14px',
+  },
+  actions: {
+    display: 'flex',
+    gap: '10px',
+    marginTop: '20px',
+    paddingTop: '18px',
+    borderTop: '1px solid rgba(255,255,255,0.06)',
   },
 };
 

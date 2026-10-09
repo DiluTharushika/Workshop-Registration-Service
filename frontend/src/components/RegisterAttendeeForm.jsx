@@ -22,76 +22,123 @@ const RegisterAttendeeForm = ({ workshop, onSuccess, onCancel }) => {
       setEmail('');
       onSuccess();
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      setError(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
+  const seatsLeft = workshop.capacity - workshop.bookedSeats;
+
   return (
-    <form onSubmit={handleSubmit} style={styles.form}>
-      <h3>Register Attendee</h3>
-      <p><strong>Workshop:</strong> {workshop.title} ({workshop.bookedSeats}/{workshop.capacity} seats)</p>
-
-      {error && <p style={styles.error}>{error}</p>}
-
-      <input
-        placeholder="Attendee name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        required
-        style={styles.input}
-      />
-      <input
-        type="email"
-        placeholder="Email address"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-        style={styles.input}
-      />
-
-      <div style={{ display: 'flex', gap: '10px' }}>
-        <button type="submit" disabled={loading} style={styles.submitBtn}>
-          {loading ? 'Registering...' : 'Register'}
-        </button>
-        <button type="button" onClick={onCancel} style={styles.cancelBtn}>
-          Close
-        </button>
+    <div style={styles.wrapper}>
+      <div style={styles.header}>
+        <h3 style={styles.heading}>📝 Register Attendee</h3>
+        <div style={styles.workshopInfo}>
+          <span style={styles.workshopName}>{workshop.title}</span>
+          <span style={styles.seatsInfo}>
+            {seatsLeft} seat{seatsLeft !== 1 ? 's' : ''} remaining
+          </span>
+        </div>
       </div>
-    </form>
+
+      <form onSubmit={handleSubmit}>
+        {error && (
+          <div className="alert alert-error" style={{ marginBottom: '14px' }}>
+            ⚠ {error}
+          </div>
+        )}
+
+        <div style={styles.grid}>
+          <div className="form-group">
+            <label className="form-label">Attendee Name</label>
+            <input
+              placeholder="Full name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              className="input-field"
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Email Address</label>
+            <input
+              type="email"
+              placeholder="email@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="input-field"
+            />
+          </div>
+        </div>
+
+        <div style={styles.actions}>
+          <button type="submit" disabled={loading} className="btn btn-primary">
+            {loading ? 'Registering…' : '✓ Register Attendee'}
+          </button>
+          <button type="button" onClick={onCancel} className="btn btn-ghost">
+            Close
+          </button>
+        </div>
+      </form>
+    </div>
   );
 };
 
 const styles = {
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '10px',
-    background: '#f0f9ff',
-    padding: '20px',
-    borderRadius: '8px',
+  wrapper: {
+    background: 'rgba(6, 182, 212, 0.05)',
+    backdropFilter: 'blur(14px)',
+    WebkitBackdropFilter: 'blur(14px)',
+    border: '1px solid rgba(6, 182, 212, 0.2)',
+    borderRadius: '16px',
+    padding: '22px 26px',
     marginBottom: '20px',
-    maxWidth: '400px',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.35)',
   },
-  input: { padding: '8px', borderRadius: '4px', border: '1px solid #ccc' },
-  submitBtn: {
-    padding: '8px 16px',
-    background: '#2563eb',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
+  header: {
+    marginBottom: '18px',
   },
-  cancelBtn: {
-    padding: '8px 16px',
-    background: '#9ca3af',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
+  heading: {
+    fontSize: '16px',
+    fontWeight: 700,
+    color: '#f1f5f9',
+    marginBottom: '8px',
   },
-  error: { color: 'red', fontSize: '13px' },
+  workshopInfo: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    flexWrap: 'wrap',
+  },
+  workshopName: {
+    fontSize: '13px',
+    color: '#22d3ee',
+    fontWeight: 600,
+  },
+  seatsInfo: {
+    fontSize: '12px',
+    background: 'rgba(6, 182, 212, 0.12)',
+    color: '#22d3ee',
+    border: '1px solid rgba(6, 182, 212, 0.2)',
+    padding: '3px 10px',
+    borderRadius: '999px',
+    fontWeight: 600,
+  },
+  grid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '14px',
+    marginBottom: '18px',
+  },
+  actions: {
+    display: 'flex',
+    gap: '10px',
+    paddingTop: '16px',
+    borderTop: '1px solid rgba(6, 182, 212, 0.1)',
+  },
 };
 
 export default RegisterAttendeeForm;
