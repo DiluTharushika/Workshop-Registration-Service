@@ -32,39 +32,15 @@ Explore the application's interface and key workflows.
 
 ### Login
 
-![Login Page](./screenshots/login.png)
+![Login Page](frontend\public\s1.png)
 
 *Secure login for authorized users.*
 
-### Dashboard
-
-![Dashboard](./screenshots/dashboard.png)
-
-*An overview of workshop registration activities.*
-
 ### Workshop Management
 
-![Workshop Management](./screenshots/workshops.png)
+![Workshop Management](frontend\public\s2.png)
 
 *Browse workshops, check seat availability, and manage workshop details.*
-
-### Attendee Registration
-
-![Attendee Registration](./screenshots/registration.png)
-
-*Register attendees while protecting limited workshop capacity.*
-
-### Registration History
-
-![Registration History](./screenshots/registration-history.png)
-
-*Review registration records, including cancelled registrations.*
-
-### User Management
-
-![User Management](./screenshots/user-management.png)
-
-*Administrators can manage Manager and Staff accounts.*
 
 ---
 
