@@ -31,18 +31,10 @@ Explore the application's interface and key workflows.
 > **Note:** Replace the example image paths below with screenshots captured from your running application. The images will appear automatically on GitHub once the files are committed to the repository.
 
 ### Login
-
-![Login Page](frontend\public\s1.png)
-
-*Secure login for authorized users.*
+![Login Page](frontend/public/s1.png)
 
 ### Workshop Management
-
-![Workshop Management](frontend\public\s2.png)
-
-*Browse workshops, check seat availability, and manage workshop details.*
-
----
+![Workshop Management](frontend/public/s2.png)
 
 ## ✨ Features
 
