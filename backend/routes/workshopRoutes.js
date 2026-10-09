@@ -9,12 +9,12 @@ const {
 const { protect } = require('../middleware/authMiddleware');
 const authorize = require('../middleware/roleMiddleware');
 
-// Manager + Staff can view
-router.get('/', protect, authorize('manager', 'staff'), getWorkshops);
-router.get('/:id', protect, authorize('manager', 'staff'), getWorkshopById);
+// Admin + Manager + Staff can view
+router.get('/', protect, authorize('admin', 'manager', 'staff'), getWorkshops);
+router.get('/:id', protect, authorize('admin', 'manager', 'staff'), getWorkshopById);
 
-// Manager only can create/edit
-router.post('/', protect, authorize('manager'), createWorkshop);
-router.put('/:id', protect, authorize('manager'), updateWorkshop);
+// Admin + Manager can create/edit
+router.post('/', protect, authorize('admin', 'manager'), createWorkshop);
+router.put('/:id', protect, authorize('admin', 'manager'), updateWorkshop);
 
 module.exports = router;
