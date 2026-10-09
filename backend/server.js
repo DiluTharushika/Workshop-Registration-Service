@@ -17,9 +17,9 @@ app.get('/', (req, res) => {
 
 // Routes will be added here in later parts
  app.use('/api/auth', require('./routes/authRoutes'));
-// app.use('/api/users', require('./routes/userRoutes'));
-// app.use('/api/workshops', require('./routes/workshopRoutes'));
-// app.use('/api/registrations', require('./routes/registrationRoutes'));
+ app.use('/api/users', require('./routes/userRoutes'));
+ app.use('/api/workshops', require('./routes/workshopRoutes'));
+ app.use('/api/registrations', require('./routes/registrationRoutes'));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
